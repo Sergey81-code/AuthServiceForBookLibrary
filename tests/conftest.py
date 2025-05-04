@@ -118,7 +118,7 @@ async def create_user_in_database(asyncpg_pool):
     async def create_user_in_database(user: dict):
         async with asyncpg_pool.acquire() as connection:
             return await connection.execute(
-                """INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)""",
+                """INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)""",
                 user["user_id"],
                 user["name"],
                 user["surname"],
@@ -126,6 +126,8 @@ async def create_user_in_database(asyncpg_pool):
                 user["is_active"],
                 Hasher.get_password_hash(user["password"]),
                 user.get("roles", [PortalRole.ROLE_PORTAL_USER]),
+                user.get("rating", 80),
+                user.get("count_of_borrowed_book", 0),
             )
 
     return create_user_in_database

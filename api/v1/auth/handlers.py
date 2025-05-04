@@ -50,7 +50,10 @@ async def create_new_access_token(
     if not refresh_token:
         AppExceptions.unauthorized_exception("Could not validate credentials")
 
-    access_token = await AuthService.create_access_token_from_refresh(
-        refresh_token, session
-    )
+    user = await AuthService.get_user_by_refresh_token(refresh_token, session)
+
+    if user is None:
+        AppExceptions.forbidden_exception()
+    auth_service = AuthService(user, session)
+    access_token = await auth_service.create_access_token()
     return {"access_token": access_token, "token_type": "bearer"}

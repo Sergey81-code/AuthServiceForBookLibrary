@@ -137,3 +137,28 @@ async def revoke_admin_privilege_action(
         updated_user_params={"roles": user_for_promotion.exclude_admin_role()},
         session=session,
     )
+
+
+
+async def change_rating_of_user_by_id(
+        user_id: UUID, 
+        rating: int,
+        session: AsyncSession,
+    ) -> UUID:
+    async with session.begin():
+        return await UserDAL(session).update_user(
+            user_id=user_id,
+            rating=rating,
+        )
+    
+
+async def change_count_of_borrowed_books_of_user_by_id(
+        user_id: UUID, 
+        count_of_borrowed: int,
+        session: AsyncSession,
+    ) -> UUID:
+    async with session.begin():
+        return await UserDAL(session).update_user(
+            user_id=user_id,
+            count_of_borrowed_book=count_of_borrowed,
+        )

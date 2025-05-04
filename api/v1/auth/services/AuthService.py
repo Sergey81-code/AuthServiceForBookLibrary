@@ -36,6 +36,8 @@ class AuthService:
                 "sub": self.user.email,
                 "user_id": str(self.user.user_id),
                 "roles": self.user.roles,
+                "rating": self.user.rating,
+                "count_of_borrowed_book": self.user.count_of_borrowed_book,
             },
             token_type="access",
         )
@@ -45,17 +47,13 @@ class AuthService:
             data={"sub": self.user.email},
             token_type="refresh",
         )
+    
 
     @staticmethod
-    async def create_access_token_from_refresh(
-        refresh_token: str, session: AsyncSession
-    ):
+    async def get_user_by_refresh_token(
+        refresh_token: str, 
+        session: AsyncSession
+    ) -> User | None:
         payload = await JWT.decode_jwt_token(refresh_token, "refresh")
         email: str = payload.get("sub")
-        user: User = await get_user_by_email_action(email, session)
-        if user is None:
-            AppExceptions.not_found_exception(f"User with email {email} not found")
-        return await JWT.create_jwt_token(
-            data={"sub": email, "user_id": str(user.user_id), "roles": user.roles},
-            token_type="access",
-        )
+        return await get_user_by_email_action(email, session)

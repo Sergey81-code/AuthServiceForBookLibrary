@@ -19,6 +19,8 @@ async def test_user_login(client, create_user_in_database):
         "surname": "Sviridov",
         "email": "lol@kek.com",
         "password": "Abcd12!@",
+        "rating": 56,
+        "count_of_borrowed_book": 5,
         "is_active": True,
         "roles": [PortalRole.ROLE_PORTAL_USER],
     }
@@ -44,6 +46,9 @@ async def test_user_login(client, create_user_in_database):
     assert resp_data_from_access["sub"] == user_data["email"]
     assert resp_data_from_access["user_id"] == str(user_data["user_id"])
     assert resp_data_from_access["roles"] == user_data["roles"]
+    assert resp_data_from_access["rating"] == user_data["rating"]
+    assert resp_data_from_access["count_of_borrowed_book"] == user_data["count_of_borrowed_book"]
+
     assert resp_data_from_refresh["sub"] == user_data["email"]
 
     assert await assert_token_lifetime(
@@ -61,6 +66,8 @@ async def test_create_access_token_by_refresh_token(client, create_user_in_datab
         "surname": "Sviridov",
         "email": "lol@kek.com",
         "password": "Abcd12!@",
+        "rating": 56,
+        "count_of_borrowed_book": 5,
         "is_active": True,
         "roles": [PortalRole.ROLE_PORTAL_USER],
     }
@@ -78,6 +85,8 @@ async def test_create_access_token_by_refresh_token(client, create_user_in_datab
     assert resp_data_from_access["sub"] == user_data["email"]
     assert resp_data_from_access["user_id"] == str(user_data["user_id"])
     assert resp_data_from_access["roles"] == user_data["roles"]
+    assert resp_data_from_access["rating"] == user_data["rating"]
+    assert resp_data_from_access["count_of_borrowed_book"] == user_data["count_of_borrowed_book"]
     assert await assert_token_lifetime(
         resp_data_from_access, settings.ACCESS_TOKEN_EXPIRE_MINUTES
     )

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.core.dependencies import get_current_user_from_access_token as get_current_user
 from api.core.dependencies import get_session
 from api.core.exceptions import AppExceptions
-from api.v1.users.actions import activate_user_action
+from api.v1.users.actions import activate_user_action, change_count_of_borrowed_books_of_user_by_id, change_rating_of_user_by_id
 from api.v1.users.actions import check_user_permissions
 from api.v1.users.actions import create_new_user_action
 from api.v1.users.actions import delete_user_action
@@ -159,3 +159,57 @@ async def revoke_admin_privilege(
     except IntegrityError:
         AppExceptions.service_unavailable_exception("Database error.")
     return UpdatedUserResponse(updated_user_id=updated_user_id)
+
+
+
+
+
+
+@user_router.delete("/change_rating")
+async def change_user_rating(
+    user_id: UUID,
+    rating: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if rating < 0 or rating > 80:
+        AppExceptions.bad_request_exception("Rating can be from 0 to 80.")
+
+    if not current_user.is_admin and not current_user.is_superadmin:
+        AppExceptions.forbidden_exception()
+
+    try:
+        user_id_with_changed_rating = await change_rating_of_user_by_id(
+            user_id, 
+            rating,
+            session,
+        )
+    except IntegrityError:
+        AppExceptions.service_unavailable_exception("Database error.")
+    return user_id_with_changed_rating
+
+
+
+
+@user_router.delete("/change_count_of_borrowed_books")
+async def change_user_count_of_borrowed_books(
+    user_id: UUID,
+    count_of_borrowed: int,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    if count_of_borrowed < 0 or count_of_borrowed > 10:
+        AppExceptions.bad_request_exception("Count of borrowed books can be from 0 to 10.")
+
+    if not current_user.is_admin and not current_user.is_superadmin:
+        AppExceptions.forbidden_exception()
+
+    try:
+        user_id_with_changed_count_of_borrowed = await change_count_of_borrowed_books_of_user_by_id(
+            user_id, 
+            count_of_borrowed,
+            session,
+        )
+    except IntegrityError:
+        AppExceptions.service_unavailable_exception("Database error.")
+    return user_id_with_changed_count_of_borrowed
