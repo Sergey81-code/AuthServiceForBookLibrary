@@ -16,7 +16,7 @@ from api.v1.users.actions import fetch_user_or_raise
 from api.v1.users.actions import grant_admin_privilege_action
 from api.v1.users.actions import process_user_update_request_action
 from api.v1.users.actions import revoke_admin_privilege_action
-from api.v1.users.schemas import ActivateUserResponse
+from api.v1.users.schemas import ActivateUserResponse, UserCountOfBorrowedBooks, UserRating
 from api.v1.users.schemas import DeleteUserResponse
 from api.v1.users.schemas import ShowUser
 from api.v1.users.schemas import UpdatedUserResponse
@@ -165,23 +165,19 @@ async def revoke_admin_privilege(
 
 
 
-@user_router.delete("/change_rating")
+@user_router.post("/change_rating")
 async def change_user_rating(
     user_id: UUID,
-    rating: int,
+    rating: UserRating,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    if rating < 0 or rating > 80:
-        AppExceptions.bad_request_exception("Rating can be from 0 to 80.")
-
-    if not current_user.is_admin and not current_user.is_superadmin:
-        AppExceptions.forbidden_exception()
-
+    rating = rating.rating
     try:
         user_id_with_changed_rating = await change_rating_of_user_by_id(
             user_id, 
             rating,
+            current_user,
             session,
         )
     except IntegrityError:
@@ -190,24 +186,19 @@ async def change_user_rating(
 
 
 
-
-@user_router.delete("/change_count_of_borrowed_books")
+@user_router.post("/change_count_of_borrowed_books")
 async def change_user_count_of_borrowed_books(
     user_id: UUID,
-    count_of_borrowed: int,
+    count_of_borrowed: UserCountOfBorrowedBooks,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    if count_of_borrowed < 0 or count_of_borrowed > 10:
-        AppExceptions.bad_request_exception("Count of borrowed books can be from 0 to 10.")
-
-    if not current_user.is_admin and not current_user.is_superadmin:
-        AppExceptions.forbidden_exception()
-
+    count_of_borrowed = count_of_borrowed.count_of_borrowed_books
     try:
         user_id_with_changed_count_of_borrowed = await change_count_of_borrowed_books_of_user_by_id(
             user_id, 
             count_of_borrowed,
+            current_user,
             session,
         )
     except IntegrityError:

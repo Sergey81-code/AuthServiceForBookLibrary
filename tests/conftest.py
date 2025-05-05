@@ -29,6 +29,9 @@ settings = get_settings()
 USER_URL = "/v1/users/"
 LOGIN_URL = "/v1/login/"
 
+CHANGE_RATING_URL = "change_rating/"
+CHANGE_COUNT_OF_BORROWED_BOOKS = "change_count_of_borrowed_books/"
+
 CLEAN_TABLES = [
     "users",
 ]
@@ -127,7 +130,7 @@ async def create_user_in_database(asyncpg_pool):
                 Hasher.get_password_hash(user["password"]),
                 user.get("roles", [PortalRole.ROLE_PORTAL_USER]),
                 user.get("rating", 80),
-                user.get("count_of_borrowed_book", 0),
+                user.get("count_of_borrowed_books", 0),
             )
 
     return create_user_in_database

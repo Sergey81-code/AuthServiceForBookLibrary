@@ -397,7 +397,7 @@ async def test_update_user_dublicate_email_error(client, create_user_in_database
     )
 
 
-async def test_get_user_bad_cred(client, create_user_in_database):
+async def test_update_user_bad_cred(client, create_user_in_database):
     user_data = {
         "user_id": uuid4(),
         "name": "Nikolai",
@@ -451,7 +451,7 @@ async def test_get_user_unauth(client, create_user_in_database):
     assert resp.json() == {"detail": "Could not validate credentials"}
 
 
-async def test_get_user_no_jwt(client, create_user_in_database):
+async def test_update_user_no_jwt(client, create_user_in_database):
     user_data = {
         "user_id": uuid4(),
         "name": "Nikolai",

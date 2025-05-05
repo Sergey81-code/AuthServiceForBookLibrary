@@ -37,7 +37,7 @@ class AuthService:
                 "user_id": str(self.user.user_id),
                 "roles": self.user.roles,
                 "rating": self.user.rating,
-                "count_of_borrowed_book": self.user.count_of_borrowed_book,
+                "count_of_borrowed_books": self.user.count_of_borrowed_books,
             },
             token_type="access",
         )

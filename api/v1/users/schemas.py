@@ -93,3 +93,25 @@ class UpdateUserRequest(BaseModel):
                 "Password must be 8-16 characters long, contain uppercase and lowercase letters, numbers, and special characters."
             )
         return value
+
+
+
+class UserRating(BaseModel):
+    rating: int
+
+    @field_validator("rating")
+    def validate_rating(cls, value):
+        if value < 0 or value > 80:
+            AppExceptions.bad_request_exception("Rating can be from 0 to 80.")
+        return value
+    
+
+
+class UserCountOfBorrowedBooks(BaseModel):
+    count_of_borrowed_books: int
+
+    @field_validator("count_of_borrowed_books")
+    def validate_rating(cls, value):
+        if value < 0 or value > 10:
+            AppExceptions.bad_request_exception("Count of borrowed books can be from 0 to 10.")
+        return value

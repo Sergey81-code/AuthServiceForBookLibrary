@@ -25,7 +25,7 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     roles: Mapped[list[str]] = mapped_column(ARRAY(String), nullable=False)
     rating: Mapped[int] = mapped_column(nullable=True, default=80)
-    count_of_borrowed_book: Mapped[int] = mapped_column(nullable=True, default=0)
+    count_of_borrowed_books: Mapped[int] = mapped_column(nullable=True, default=0)
 
     # user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     # name = Column(String, nullable=False)

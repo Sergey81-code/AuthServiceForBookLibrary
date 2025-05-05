@@ -143,8 +143,24 @@ async def revoke_admin_privilege_action(
 async def change_rating_of_user_by_id(
         user_id: UUID, 
         rating: int,
+        current_user: User,
         session: AsyncSession,
     ) -> UUID:
+
+    if not current_user.is_admin and not current_user.is_superadmin:
+        AppExceptions.forbidden_exception()
+
+    if current_user.user_id == user_id:
+        AppExceptions.bad_request_exception("Cannot change rating of itself.")
+
+    user_for_promotion = await fetch_user_or_raise(user_id, current_user, session)
+
+    if user_for_promotion.is_superadmin or \
+            (user_for_promotion.is_admin and not current_user.is_superadmin):
+        AppExceptions.forbidden_exception(
+            f"Rating of user with email {user_for_promotion.email} cannot be changed by you."
+        )
+
     async with session.begin():
         return await UserDAL(session).update_user(
             user_id=user_id,
@@ -155,10 +171,26 @@ async def change_rating_of_user_by_id(
 async def change_count_of_borrowed_books_of_user_by_id(
         user_id: UUID, 
         count_of_borrowed: int,
+        current_user: User,
         session: AsyncSession,
     ) -> UUID:
+
+    if not current_user.is_admin and not current_user.is_superadmin:
+        AppExceptions.forbidden_exception()
+
+    if current_user.user_id == user_id:
+        AppExceptions.bad_request_exception("Cannot change count of borrowed books of itself.")
+
+    user_for_promotion = await fetch_user_or_raise(user_id, current_user, session)
+
+    if user_for_promotion.is_superadmin or \
+            (user_for_promotion.is_admin and not current_user.is_superadmin):
+        AppExceptions.forbidden_exception(
+            f"Count of borrowed books of user with email {user_for_promotion.email} cannot be changed by you."
+        )
+
     async with session.begin():
         return await UserDAL(session).update_user(
             user_id=user_id,
-            count_of_borrowed_book=count_of_borrowed,
+            count_of_borrowed_books=count_of_borrowed,
         )
