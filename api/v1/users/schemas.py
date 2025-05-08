@@ -26,6 +26,8 @@ class ShowUser(TunedModel):
     surname: str
     email: EmailStr
     is_active: bool
+    rating: int | None = None
+    count_of_borrowed_books: int | None = None
 
 
 class UserCreate(BaseModel):
@@ -93,6 +95,7 @@ class UpdateUserRequest(BaseModel):
                 "Password must be 8-16 characters long, contain uppercase and lowercase letters, numbers, and special characters."
             )
         return value
+    
 
 
 
@@ -111,7 +114,7 @@ class UserCountOfBorrowedBooks(BaseModel):
     count_of_borrowed_books: int
 
     @field_validator("count_of_borrowed_books")
-    def validate_rating(cls, value):
+    def validate_count_of_borrowed_books(cls, value):
         if value < 0 or value > 10:
             AppExceptions.bad_request_exception("Count of borrowed books can be from 0 to 10.")
         return value

@@ -7,7 +7,7 @@ from tests.conftest import USER_URL
 from utils.roles import PortalRole
 
 
-async def test_get_user(client, create_user_in_database):
+async def test_get_user_by_himself(client, create_user_in_database):
     user_data = {
         "user_id": uuid4(),
         "name": "Nikolai",
@@ -15,6 +15,8 @@ async def test_get_user(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
     }
     await create_user_in_database(user_data)
     resp = client.get(
@@ -27,6 +29,93 @@ async def test_get_user(client, create_user_in_database):
     assert user_from_response["name"] == user_data["name"]
     assert user_from_response["surname"] == user_data["surname"]
     assert user_from_response["email"] == user_data["email"]
+    assert user_from_response["rating"] is None
+    assert user_from_response["count_of_borrowed_books"] == user_data["count_of_borrowed_books"]
+    assert user_from_response["is_active"] is user_data["is_active"]
+
+
+async def test_get_user_by_admin(client, create_user_in_database):
+    user_data = {
+        "user_id": uuid4(),
+        "name": "Nikolai",
+        "surname": "Sviridov",
+        "email": "lol@kek.com",
+        "password": "Abcd12!@",
+        "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
+    }
+
+    admin_data = {
+        "user_id": uuid4(),
+        "name": "Nikolaii",
+        "surname": "Sviridovi",
+        "email": "lol1@kek.com",
+        "password": "Abcd12!@",
+        "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
+        "roles": [PortalRole.ROLE_PORTAL_ADMIN]
+    }
+
+    await create_user_in_database(user_data)
+    await create_user_in_database(admin_data)
+
+    resp = client.get(
+        f"{USER_URL}?user_id={user_data['user_id']}",
+        headers=await create_test_auth_headers_for_user(admin_data["email"]),
+    )
+    assert resp.status_code == 200
+    user_from_response = resp.json()
+    assert user_from_response["user_id"] == str(user_data["user_id"])
+    assert user_from_response["name"] == user_data["name"]
+    assert user_from_response["surname"] == user_data["surname"]
+    assert user_from_response["email"] == user_data["email"]
+    assert user_from_response["rating"] == user_data["rating"]
+    assert user_from_response["count_of_borrowed_books"] == user_data["count_of_borrowed_books"]
+    assert user_from_response["is_active"] is user_data["is_active"]
+
+
+
+async def test_get_user_by_superadmin(client, create_user_in_database):
+    user_data = {
+        "user_id": uuid4(),
+        "name": "Nikolai",
+        "surname": "Sviridov",
+        "email": "lol@kek.com",
+        "password": "Abcd12!@",
+        "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
+    }
+
+    admin_data = {
+        "user_id": uuid4(),
+        "name": "Nikolaii",
+        "surname": "Sviridovi",
+        "email": "lol1@kek.com",
+        "password": "Abcd12!@",
+        "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
+        "roles": [PortalRole.ROLE_PORTAL_SUPERADMIN]
+    }
+
+    await create_user_in_database(user_data)
+    await create_user_in_database(admin_data)
+
+    resp = client.get(
+        f"{USER_URL}?user_id={user_data['user_id']}",
+        headers=await create_test_auth_headers_for_user(admin_data["email"]),
+    )
+    assert resp.status_code == 200
+    user_from_response = resp.json()
+    assert user_from_response["user_id"] == str(user_data["user_id"])
+    assert user_from_response["name"] == user_data["name"]
+    assert user_from_response["surname"] == user_data["surname"]
+    assert user_from_response["email"] == user_data["email"]
+    assert user_from_response["rating"] == user_data["rating"]
+    assert user_from_response["count_of_borrowed_books"] == user_data["count_of_borrowed_books"]
     assert user_from_response["is_active"] is user_data["is_active"]
 
 
@@ -38,6 +127,8 @@ async def test_get_user_id_validation_error(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
     }
     await create_user_in_database(user_data)
     resp = client.get(
@@ -69,6 +160,8 @@ async def test_get_user_not_found_error(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
         "roles": [PortalRole.ROLE_PORTAL_USER, PortalRole.ROLE_PORTAL_SUPERADMIN],
     }
     user_id_for_finding = uuid4()
@@ -92,6 +185,8 @@ async def test_get_user_bad_cred(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
     }
     await create_user_in_database(user_data)
     resp = client.get(
@@ -110,6 +205,8 @@ async def test_get_user_unauth(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
     }
     await create_user_in_database(user_data)
     bad_auth_headers = await create_test_auth_headers_for_user(user_data["email"])
@@ -130,6 +227,8 @@ async def test_get_user_no_jwt(client, create_user_in_database):
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
     }
     await create_user_in_database(user_data)
     resp = client.get(
@@ -157,6 +256,8 @@ async def test_get_user_by_privilage_roles(
         "email": "lol@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
         "roles": [PortalRole.ROLE_PORTAL_USER],
     }
     user_who_get = {
@@ -166,6 +267,8 @@ async def test_get_user_by_privilage_roles(
         "email": "lol1@kek.com",
         "password": "Abcd12!@",
         "is_active": True,
+        "rating": 80,
+        "count_of_borrowed_books": 2,
         "roles": user_role_list,
     }
     await create_user_in_database(user_data_for_getting)

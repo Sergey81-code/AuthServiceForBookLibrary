@@ -40,6 +40,7 @@ async def create_user(
             surname=user.surname,
             email=user.email,
             is_active=user.is_active,
+            count_of_borrowed_books=user.count_of_borrowed_books
         )
     except IntegrityError as err:
         AppExceptions.service_unavailable_exception(f"Database error: {err}")
@@ -94,12 +95,19 @@ async def get_user_by_id(
     ):
         AppExceptions.forbidden_exception()
 
+    rating_of_user = (
+        None if not current_user.is_admin and not current_user.is_superadmin 
+        else target_user.rating
+    )
+
     return ShowUser(
         user_id=target_user.user_id,
         name=target_user.name,
         surname=target_user.surname,
         email=target_user.email,
         is_active=target_user.is_active,
+        rating=rating_of_user,
+        count_of_borrowed_books=target_user.count_of_borrowed_books
     )
 
 
